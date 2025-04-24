@@ -1,0 +1,222 @@
+---
+title: "Regressão Linear"
+author: "Jaqueline V Moreira"
+date: "12/04/2025`"
+output: 
+  pdf_document: #default
+      latex_engine: xelatex
+---
+
+```{r "Loading packages", include=FALSE}
+
+library(tidyverse)
+library(ggpubr) #organizes and displays multiple charts together
+library(ggalt) #ggplots with smoother lines
+library(dplyr)
+library (magrittr) #compound assignment pipe-operator - %<>%
+library (patchwork) #displays more than one chart together
+
+library(scales) #converts decimal scale to percentual scale
+library(queueing) #Queuing theory
+
+library(devtools) #Latex format
+library(tinytex)
+#install_github(c("yihui/tinytex", "rstudio/rmarkdown"))
+#tinytex::install_tinytex()
+
+```
+
+
+```{r "color palettes", include=FALSE}
+
+colors = c("#DCAB6B","darkorange","#F28F3B","#C0BF5F","#C8553D",
+                  "#BB7E5D","#BA6E6E","#8C705F", "#DE5466")
+
+
+```
+
+## O exercicio
+Em um estudo de produção utilizado por uma fábrica, dois indicadores de controle de umidade estão sendo avaliados quanto à qualidade e permanência na cartela de medidas de controle. Durante 10 dias, mediu-se um indicador de umidade de uma amostra de material produzido e da umidade relativa no local de produção do mesmo material. As medidas estão apresentadas, em percentuais, na tabela a seguir:
+
+
+\begin{center}
+\begin{tabular}{ |c|c| c| c| c| c| c| c| c| c| c| }
+ \hline
+ No local & 46 & 53 & 37 & 42 & 34 & 29 & 60 & 44 & 41 & 48 \\ 
+ \hline 
+ No material & 12 & 14 & 11 & 13 & 10 & 8 & 17 & 12 & 10 & 15 \\
+ \hline
+\end{tabular}
+\end{center}
+
+
+Com base em seus conhecimentos, proceda no ajuste, nos testes relativos e na interpretação de um modelo de regressão linear simples, considerando $\alpha = 5%$.
+
+
+## Correlação
+
+O coeficiente de correlação r - ou correlação de Pearson - é uma métrica estatistica que quantifica a "força" da relação linear entre duas variáveis numéricas.
+o coeficienete r possui dominio de -1 a 1, sendo:
+
+* 0 = Nenhuma correlação linear
+* 1 = correlação linear positiva perfeita, onde ambas as variáveis seguem a mesma direção.
+* -1 = correlação linear negativa perfeita, onde as variáveis seguem direções opostas. (enquanto uma cresce a outra decresce)
+
+### Cálculo do coeficiente r
+
+$$r = \frac{\sum(x_i - \bar{x})(y_i - \bar{y})}{\sqrt \sum(x_i-\bar{x})^2\sum(y_i-\bar{y})^2}$$
+
+sendo:
+
+$$ x_i,y_i = \text{dados observados}$$
+$$ \bar{x},\bar{y} = \text{média amostral de X e Y}$$
+
+De acordo com o exercicio proposto, a variável independente X é "umidade relativa no local" e a variável dependente Y é a "umidade do material".
+
+Cálculo manual através do excel
+
+
+
+
+
+Cálculo com o RStudio
+
+```{r "correlação", echo=TRUE}
+
+x <- c(46, 53, 37, 42, 34, 29, 60, 44, 41, 48)
+y <- c(12, 14, 11, 13, 10, 8, 17, 12, 10, 15)
+
+cor(x, y)
+```
+De acordo com o coeficiente r obtido, considera-se que há uma relação linear positiva forte entre a umidade relativa no local e a umidade do material.
+
+## gráfico
+
+## Regressão Linear
+A regressão linear é um modelo estatístico que tem como objetivo quantificar o poder preditivo de uma variável explicativa sobre uma variável resposta. Em outras palavras, ela busca medir o quanto uma variável independente é capaz de explicar o comportamento observada na variável dependente.
+
+Como dados de saída de um modelo de regressão linear têm-se:
+
+* a formula da equação da reta que melhor se ajusta aos dados (construída através do método dos minimos quadrados)
+* valor de $r^2$ Coeiciente que indica o quão bem alinhada aos dados é a reta construída - fitting line ratio. 
+
+$$\text{Equação básica da reta = } Y = b0 + b1x + e$$
+
+onde:
+b1 = coeficiente angular da reta, indica quanto a variável Y varia em relação ao aumento de uma unidade da variável X.
+No caso concreto, quanto a umidade no material varia a cada 1% de aumento na umidade do local.
+
+e = erro ou residuo do modelo. Representa a parte de Y que não é explicada por X.
+$$ e = Yi - Ypredito pela reta$$
+
+
+Cálculo com o RStudio
+
+```{r "regressão linear", echo=TRUE}
+
+x <- c(46, 53, 37, 42, 34, 29, 60, 44, 41, 48)
+y <- c(12, 14, 11, 13, 10, 8, 17, 12, 10, 15)
+
+reg_linear = lm(y~x)
+
+summary(reg_linear)
+```
+De acordo com os coeficientes encontrados pelo RStudio, a formula da reta que melhor descreve os dados é:
+
+$$Y^ = 0,34765 + 0,27310x$$
+
+O valor do coeficiente r^2 (Multiple R-squared) é 0,8682, dessa forma, considera-se que mais de 86% da variação da umidade do material (Y) é explicada pela umidade do local (x).
+
+## Teste de Hipotese
+
+Partindo da premissa mde que H0 deve ser definida como a hipótese neutra que assume a ausência de efeito ou diferença, considera-se:
+
+$$h0 = \text{não há relação linear}$$
+$$h1 = \text{há relação linear}$$
+
+Segundo o enunciado, o valor de alfa a ser considerado no teste de significancia é de 5%. 
+Assim, se o p-valor do modelo for inferior a 5% têm-se evidencia suficinete para rejeitar a hipotese nula e assumir a hipotese alternativa.
+
+De acordo com os resultados obtidos pelo RStudio, o p-valor do modelo foi de 8.716e-05. Como $8.716e-05 < 5%$, considera-se que há relação linear entre as variáveis X e Y.
+
+
+
+```{r "scatter plot calc", include=FALSE}
+
+x <- c(46, 53, 37, 42, 34, 29, 60, 44, 41, 48)
+y <- c(12, 14, 11, 13, 10, 8, 17, 12, 10, 15)
+
+
+# Building the linear regresion function
+
+lin_reg_func <- function(x) { 
+  
+  return(0.34765 + 0.27310*x)
+}
+
+# Calculating the y bar valkues for each x variable
+
+y_bar = c(rep(NA,length(x)))
+
+for (i in x) {
+  
+  y_bar[which(x == i)] = lin_reg_func(i)
+  
+}
+
+# Building the data frame
+
+
+df <- data.frame(x = x, y = y, v_bar = y_bar) 
+
+```
+
+```{r "scatter plot", echo=FALSE}
+
+
+lin_reg_plot <- df %>% ggplot(mapping = (aes(x = x, y = y))) +
+  geom_point() + 
+  
+  geom_line(aes(x = x, y = y_bar)) +
+  
+  annotate("label", x = max(x-10), y = max(y-10), label = "Y_bar = 0,34765 + 0,27310x", size = 5) +
+  
+  # definindo Titulos
+  labs(title = "Linear Regression",
+       y = "P(x)",
+       x= "x" ) + 
+
+  # alterando aparecia
+  theme_classic()+
+  theme(# titles
+        plot.title = element_text(hjust = 0.5, size=14, face="bold"),
+        axis.title.x = element_text(size=10, hjust = 0.9, face = "bold"),
+        axis.title.y = element_text(size=10, hjust = 0.9, face = "bold", angle = 0),
+        legend.title = element_blank(),
+        plot.subtitle = element_text(hjust = 0.5, size=11),
+        #legend
+        legend.position= "none",
+        legend.text = element_blank(),
+        #axis
+        axis.text.x = element_text(size=10),
+        axis.text.y = element_text(size=10),
+        #axis.line = element_line(color = "black", size = 1, linetype = 1))
+        #grid
+        panel.grid.major = element_line(color = "grey", linewidth = 0.5, linetype = 2))
+        #panel.grid.major.y = element_line(color = "grey", size = 0.5, linetype = 2))
+
+
+
+lin_reg_plot
+
+
+
+```
+
+
+## Conclusão
+Conforme os resultados obtidos, conclui-se que há uma forte correlação entre as variáveis X e Y apresentadas pelo enunciado, sendo possivel concluir que a variável explicativa "umidade relativa local" é um bom preditor para a variável resposta "umidade do material" com mais de 86% de Y sendo explicada por X e um p-valor muito inferior ao valor de alfa estabelecido.
+
+
+
+
